@@ -1,0 +1,16 @@
+.idea
+/.idea
+vendor
+/vendor
+*.exe
+*.out
+*.o
+*.a
+*.so
+*.bin
+*.test
+
+vendor/
+bin/
+obj/
+tmp/
