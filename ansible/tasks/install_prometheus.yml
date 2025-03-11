@@ -1,0 +1,16 @@
+---
+- name: Configure Prometheus to monitor Grafana
+  hosts: prometheus_servers
+  become: true
+
+  tasks:
+    - name: Add Grafana to Prometheus scrape config
+      lineinfile:
+        path: /etc/prometheus/prometheus.yml
+        line: "- targets: ['{{ virtual_ip }}:3000']"
+        insertafter: "scrape_configs:"
+
+    - name: Reload Prometheus service
+      systemd:
+        name: prometheus
+        state: reloaded

@@ -1,0 +1,18 @@
+---
+- name: Install Traefik Ingress Controller
+  hosts: traefik_servers
+  become: true
+  tasks:
+    - name: Install Helm
+      apt:
+        name: helm
+        state: present
+
+    - name: Add Traefik Helm repository
+      command: helm repo add traefik https://helm.traefik.io/traefik
+
+    - name: Update Helm repositories
+      command: helm repo update
+
+    - name: Install Traefik using Helm
+      command: helm install traefik traefik/traefik --set ingressClass.enabled=true

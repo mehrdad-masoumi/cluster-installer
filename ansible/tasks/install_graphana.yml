@@ -1,0 +1,30 @@
+---
+- name: Install Grafana and HAProxy Dashboard
+  hosts: haproxy_servers
+  become: true
+
+  tasks:
+    - name: Install Grafana
+      apt:
+        name: grafana
+        state: present
+
+    - name: Start and enable Grafana service
+      systemd:
+        name: grafana-server
+        state: started
+        enabled: yes
+
+    - name: Open Grafana port in firewall (if applicable)
+      ufw:
+        rule: allow
+        name: 'Grafana'
+        port: 3000
+
+    - name: Create HAProxy dashboard in Grafana
+      grafana_dashboard:
+        url: https://raw.githubusercontent.com/prometheus/alertmanager/master/contrib/grafana/dashboards/haproxy.json
+        state: present
+        folder: "HAProxy Dashboards"
+        login_user: admin
+        login_password: admin

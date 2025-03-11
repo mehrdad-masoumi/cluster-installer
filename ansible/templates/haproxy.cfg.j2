@@ -1,0 +1,46 @@
+# Global settings
+global
+    log /dev/log local0
+    log /dev/log local1 notice
+    maxconn 200
+
+# Default settings
+defaults
+    log     global
+    option  httplog
+    option  dontlognull
+    timeout connect 5000ms
+    timeout client  50000ms
+    timeout server  50000ms
+
+frontend stats
+    bind *:8404
+    stats enable
+    stats uri /stats
+    stats refresh 10s
+
+
+frontend http_front
+    bind *:80
+    mode http
+    default_backend traefik_http
+
+frontend https_front
+    bind *:443 ssl crt /etc/haproxy/certs/example.com.pem
+    mode http
+    default_backend traefik_https
+
+backend traefik_http
+    mode http
+    balance roundrobin
+    server k8s-master-1 {{ traefik_master_1 }}:32080 check
+    server k8s-master-2 {{ traefik_master_2 }}:32080 check
+    server k8s-master-3 {{ traefik_master_3 }}:32080 check
+
+backend traefik_https
+    mode http
+    balance roundrobin
+    server k8s-master-1 {{ traefik_master_1 }}:32443 check ssl verify none
+    server k8s-master-2 {{ traefik_master_2 }}:32443 check ssl verify none
+    server k8s-master-3 {{ traefik_master_3 }}:32443 check ssl verify none
+

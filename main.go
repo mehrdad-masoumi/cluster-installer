@@ -37,6 +37,7 @@ func main() {
 	}
 
 	switch os.Args[1] {
+
 	case "--install-requirements":
 
 		err := ExecCommand("apt-get", "update", "-y")
@@ -64,7 +65,11 @@ func main() {
 			return
 		}
 
-		err = ExecCommand("sudo", "git", "config", "--global", "--add", "safe.directory", "/home/ubuntu/kubespray")
+		fmt.Println(Green + "success install requirements" + Reset)
+
+	case "--kubernetes-requirements":
+
+		err := ExecCommand("sudo", "git", "config", "--global", "--add", "safe.directory", "/home/ubuntu/kubespray")
 		if err != nil {
 			return
 		}
@@ -90,9 +95,7 @@ func main() {
 			return
 		}
 
-		fmt.Println(Green + "success install requirements" + Reset)
-
-	case "--cluster-kubernetes":
+	case "--kubernetes-cluster":
 
 		if len(os.Args) < 3 {
 			log.Fatal("please provide a inventory file")
@@ -100,7 +103,7 @@ func main() {
 
 		fmt.Println("ping to all servers is running...")
 
-		err := ExecCommand("ansible", "all", "-i", os.Args[2], "-m", "ping")
+		err := ExecCommand("ansible", "kubernetes_servers", "-i", os.Args[2], "-m", "ping")
 		if err != nil {
 			log.Fatalf(Red+"connection is not successful: %v"+Reset, err)
 		}
@@ -115,7 +118,7 @@ func main() {
 			return
 		}
 
-	case "--cluster-haproxy":
+	case "--haproxy":
 
 		if len(os.Args) < 3 {
 			log.Fatal("please provide a inventory file")
@@ -130,6 +133,72 @@ func main() {
 			return
 		}
 
+	case "--docker":
+
+		if len(os.Args) < 3 {
+			log.Fatal("please provide a inventory file")
+		}
+
+		if len(os.Args) < 4 {
+			log.Fatal("please provide a playbook file")
+		}
+
+		err := ExecCommand("ansible-playbook", "-i", os.Args[2], "--become", "--become-user=root", os.Args[3])
+		if err != nil {
+			return
+		}
+
+	case "--gitlab-kubernetes":
+
+		if len(os.Args) < 3 {
+			log.Fatal("please provide a inventory file")
+		}
+
+		if len(os.Args) < 4 {
+			log.Fatal("please provide a playbook file")
+		}
+
+		err := ExecCommand("ansible-playbook", "-i", os.Args[2], "--become", "--become-user=root", os.Args[3])
+		if err != nil {
+			return
+		}
+
+	case "--gitlab":
+
+		if len(os.Args) < 3 {
+			log.Fatal("please provide a domain name")
+		}
+
+		err := ExecCommand("apt-get", "update", "-y")
+		if err != nil {
+			return
+		}
+
+		err = ExecCommand("sudo", "apt-get", "install", "-y", "curl", "openssh-server", "ca-certificates", "tzdata", "perl")
+		if err != nil {
+			return
+		}
+
+		err = ExecCommand("sudo", "apt-get", "install", "-y", "postfix")
+		if err != nil {
+			return
+		}
+
+		err = ExecCommand("curl", "https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh", "|", "sudo", "bash")
+		if err != nil {
+			return
+		}
+
+		err = ExecCommand("sudo", "EXTERNAL_URL=", os.Args[2], "apt-get", "install", "gitlab-ce")
+		if err != nil {
+			return
+		}
+
+		fmt.Println(Green + "success install gitlab" + Reset)
+
+	case "--help":
+		fmt.Println("ansible-playbook  -i /mnt/d/ws/ansible/inventory.yml --become --become-user=root /mnt/d/ws/ansible/tasks/install_docker.yml")
+		fmt.Println("ansible-playbook  -i /mnt/d/ws/ansible/inventory.yml --become --become-user=root /mnt/d/ws/ansible/tasks/install_gitlab.yml")
 	default:
 		log.Fatal("please provide a command")
 	}

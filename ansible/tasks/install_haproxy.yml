@@ -1,0 +1,58 @@
+---
+- name: Install HAProxy and Keepalived
+  hosts: haproxy_servers
+  become: true
+  vars:
+      domain_name: "{{ domain_name }}"
+      traefik_master_1: "{{ hostvars['master1'].ansible_host }}"
+      traefik_master_2: "{{ hostvars['master2'].ansible_host }}"
+      traefik_master_3: "{{ hostvars['master3'].ansible_host }}"
+      lb1: "{{ hostvars['lb1'].ip }}"
+      lb2: "{{ hostvars['lb2'].ip }}"
+      virtual_ip: "{{ virtual_ip }}"
+      password: "{{ password }}"
+  tasks: 
+    - name: Install required packages
+      apt:
+        name:
+          - haproxy
+          - keepalived
+        state: present
+        update_cache: yes
+
+    - name: Ensure HAProxy is started and enabled
+      service:
+        name: haproxy
+        state: started
+        enabled: yes
+
+    - name: Ensure Keepalived is started and enabled
+      service:
+        name: keepalived
+        state: started
+        enabled: yes
+
+    - name: Configure HAProxy
+      template:
+        src: templates/haproxy.cfg.j2
+        dest: /etc/haproxy/haproxy.cfg
+      notify:
+        - Restart HAProxy
+
+    - name: Configure Keepalived
+      template:
+        src: templates/keepalived.conf.j2
+        dest: /etc/keepalived/keepalived.conf
+      notify:
+        - Restart Keepalived
+
+  handlers:
+    - name: Restart HAProxy
+      service:
+        name: haproxy
+        state: restarted
+
+    - name: Restart Keepalived
+      service:
+        name: keepalived
+        state: restarted

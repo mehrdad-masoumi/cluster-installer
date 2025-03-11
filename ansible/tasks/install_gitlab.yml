@@ -1,0 +1,30 @@
+---
+- name: Install GitLab with Helm on Kubernetes (with Container Registry)
+  hosts: all
+  become: true
+  tasks:
+
+    - name: Install Helm
+      apt:
+        name: helm
+        state: present
+
+    - name: Add GitLab Helm repository
+      command: helm repo add gitlab https://charts.gitlab.io
+
+    - name: Update Helm repositories
+      command: helm repo update
+
+    - name: Create namespace for GitLab
+      command: kubectl create namespace gitlab --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Install GitLab with Helm (with Container Registry)
+      command: >
+        helm upgrade --install gitlab gitlab/gitlab
+        --namespace gitlab
+        --set global.hosts.domain=example.com
+        --set certmanager.install=false
+        --set gitlab-runner.install=true
+        --set registry.enabled=true
+        --set registry.host=registry.example.com
+        --set registry.storage.secret=gitlab-registry-secret
