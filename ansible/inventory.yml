@@ -1,12 +1,9 @@
 [all]
-lb1 ansible_host=185.204.170.20 ip=192.168.2.254
-lb2 ansible_host=185.204.170.20 ip=192.168.2.254
-master1 ansible_host=185.204.170.20 ip=192.168.2.254
-worker1 ansible_host=185.204.170.215 ip=192.168.3.114
+master1 ansible_host=188.121.119.166 ip=192.168.0.44
+worker1 ansible_host=37.32.25.51 ip=192.168.2.138
 
 [docker_servers]
 gitlab
-
 
 [haproxy_servers]
 lb1
@@ -19,7 +16,7 @@ master1
 master1
 worker1
 
-[kube_masters]
+[kube_control_plane]
 master1
 
 [etcd]
@@ -29,9 +26,8 @@ master1
 worker1
 
 [k8s_cluster:children]
-kube_masters
+kube_control_plane
 kube_nodes
-
 
 [all:vars]
 ansible_user=ubuntu
@@ -39,3 +35,8 @@ ansible_ssh_private_key_file=/home/ubuntu/.ssh/id_rsa
 domain_name=anikmlm.ir
 virtual_ip={{ vault_virtual_ip }}
 password={{ vault_password }}
+
+
+dns_servers:
+  - "178.22.122.100"
+  - "185.51.200.2"

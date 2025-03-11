@@ -38,7 +38,7 @@ func main() {
 
 	switch os.Args[1] {
 
-	case "--install-requirements":
+	case "--requirements":
 
 		err := ExecCommand("apt-get", "update", "-y")
 		if err != nil {
@@ -55,7 +55,7 @@ func main() {
 			return
 		}
 
-		err = ExecCommand("pip3", "install", "ansible")
+		err = ExecCommand("pip3", "install", "ansible-core>=2.16,<2.17")
 		if err != nil {
 			return
 		}
@@ -197,8 +197,16 @@ func main() {
 		fmt.Println(Green + "success install gitlab" + Reset)
 
 	case "--help":
+		fmt.Println("--install-requirements")
+		fmt.Println("--kubernetes-requirements")
+		fmt.Println("--kubernetes-cluster")
+		fmt.Println("--haproxy")
+		fmt.Println("--docker")
+		fmt.Println("--gitlab-kubernetes")
+		fmt.Println("--gitlab")
 		fmt.Println("ansible-playbook  -i /mnt/d/ws/ansible/inventory.yml --become --become-user=root /mnt/d/ws/ansible/tasks/install_docker.yml")
 		fmt.Println("ansible-playbook  -i /mnt/d/ws/ansible/inventory.yml --become --become-user=root /mnt/d/ws/ansible/tasks/install_gitlab.yml")
+		fmt.Println("install kuberneties: ansible-playbook  -i /mnt/d/ws/ansible/inventory.yml --become --become-user=root cluster.yml")
 	default:
 		log.Fatal("please provide a command")
 	}
